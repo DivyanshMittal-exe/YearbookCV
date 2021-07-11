@@ -139,7 +139,7 @@ def MakeCollage(inputPath,TemplateFile,outputPath):
     i = 0
     for file in os.listdir(inputPath):
         img_initial = cv2.imread(inputPath + "\\" + file)
-        img_out = CropBody(inputPath + "\\" + file, 2 * CircleList[i].r)
+        img_out = CropBody(inputPath + "\\" + file, 2 * CircleList[i].r,makeCircle=True)
         img_out = cv2.rotate(img_out, cv2.cv2.ROTATE_90_CLOCKWISE)
         for row in range(2 * CircleList[i].r):
             for col in range(2 * CircleList[i].r):
