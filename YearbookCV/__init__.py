@@ -1,0 +1,5 @@
+from YearbookCV.AutoAlignerModule import AutoAligner
+from YearbookCV.BackgroundModule import SelfiSegmentation
+from YearbookCV.PoseDetectorModule import PoseDetector
+from YearbookCV.MosaicModule import MosaicMaker
+from YearbookCV.CollageModule import CollageMaker
