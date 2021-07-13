@@ -158,5 +158,5 @@ def createMosaic(target_image,input_images, grid_size,output_filename):
 
     # print("saved output to %s" % (output_filename,))
     # print('done.')
-
-createMosaic('kalpit.jpg', 'grpImages', (50,50),'final')
+if __name__ == "__main__":
+    createMosaic('kalpit.jpg', 'grpImages', (50,50),'final')
