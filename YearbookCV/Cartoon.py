@@ -53,7 +53,9 @@ def BlurredCartoon(inputPath, outputPath):
         blurred = cv2.bilateralFilter(result, d=10, sigmaColor=250, sigmaSpace=250)
         cartoon = cv2.bitwise_and(blurred, blurred, mask=edges)
 
-        if not cv2.imwrite(outputPath + "\\" + file , cartoon):
+        try:
+            cv2.imwrite(outputPath + "\\" + file , cartoon)
+        except:
             cv2.imwrite(outputPath + "\\" + file+ ".png", cartoon)
 
 def CartoonFilter(inputPath, outputPath):
@@ -70,8 +72,13 @@ def CartoonFilter(inputPath, outputPath):
         coloured = ColourQuantization(image)
         contoured = Countours(coloured)
         final_image = contoured
-        if not cv2.imwrite(outputPath + "\\" + file , final_image):
-            cv2.imwrite(outputPath + "\\" + file+ ".png", final_image)
+
+        try:
+            cv2.imwrite(outputPath + "\\" + file, final_image)
+        except:
+            cv2.imwrite(outputPath + "\\" + file + ".png", final_image)
+        # if not cv2.imwrite(outputPath + "\\" + file , final_image):
+        #     cv2.imwrite(outputPath + "\\" + file+ ".png", final_image)
 
 if __name__ == "__main__":
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,10 +86,6 @@ if __name__ == "__main__":
 
     inputPath = os.path.join(BASE_DIR + "\\Input")
     outputPath = os.path.join(BASE_DIR + "\\Output")
+    BlurredCartoon(inputPath, outputPath)
 
-    for file in os.listdir(inputPath):
-
-        # img_initial = cv2.imread(inputPath + "\\" + file)
-        CartoonFilter(inputPath , outputPath)
-        # outImg = outImg[0]
 

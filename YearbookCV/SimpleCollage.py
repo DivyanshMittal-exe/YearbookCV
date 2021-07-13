@@ -6,14 +6,16 @@ import operator
 from YearbookCV.Crop import CropBody
 
 
-def SimpleCollage(inputPath,outputPath,size,makeCircle,array = None):
+def SimpleCollage(inputPath,outputPath,size,makeCircle = True,array = None,removeBackground = False,filename = "Collage.png"):
     """
 
         :param inputPath: image folder path
         :param outputPath: output folder path
         :param size: Specify the final image size as (rows,columns) tuple
-        :param size: Pass a numpy array with 1s at the position you want the image and 0s at the place to leave blank
+        :param array: Pass a numpy array with 1s at the position you want the image and 0s at the place to leave blank
         :param makeCircle: Crop as circle or square
+        :param removeBackground: Specify removing background or not, by default false
+        :param filename: Filename of the final collage, by default "Collage.png"
 
         """
     images_files = os.listdir(inputPath)
@@ -39,7 +41,7 @@ def SimpleCollage(inputPath,outputPath,size,makeCircle,array = None):
                 break
             if array[row,col] == 1:
 
-                img_out = CropBody(inputPath + "\\" + images_files[i], 2*radius,makeCircle=makeCircle)
+                img_out = CropBody(inputPath + "\\" + images_files[i], 2*radius,makeCircle=makeCircle,removeBackground=removeBackground)
                 x_locn = int((row+0.5)*rowsize)
                 y_locn = int((col + 0.5) * colsize)
                 final_img[x_locn-radius:x_locn+radius,y_locn-radius:y_locn+radius,] = img_out
@@ -47,9 +49,10 @@ def SimpleCollage(inputPath,outputPath,size,makeCircle,array = None):
 
 
 
-    if not cv2.imwrite(os.path.join(outputPath + "Collage.png"), final_img):
-        raise Exception("Could not write image")
-
+    try:
+        cv2.imwrite(os.path.join(outputPath + "\\ "+ filename ), final_img)
+    except:
+        cv2.imwrite(os.path.join(outputPath + "\\ " + filename +".png"), final_img)
 
 if __name__ == "__main__":
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,6 +62,6 @@ if __name__ == "__main__":
     outputPath = os.path.join(BASE_DIR + "\\Output")
 
 
-    SimpleCollage(inputPath,outputPath,(2000,3000),False)
+    SimpleCollage(inputPath,outputPath,(2000,3000),True)
 
 

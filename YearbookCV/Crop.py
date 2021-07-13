@@ -34,46 +34,58 @@ def CropFace(img_file_src, size, output_path=None, makeCircle = True):
 
     faces = face_cascade.detectMultiScale(grayImg, scaleFactor=1.1, minNeighbors=5)
 
+    if len(faces) == 0:
+        faces = []
+        rows, cols, c = img_initial.shape
+        ColCenter = int(cols / 2)
+        RowCenter = int(rows / 2)
+        radius = min(ColCenter, RowCenter)
+        faces.append( [ColCenter, RowCenter, radius,radius])
+
     # print(faces)
-    if len(faces) > 0:
-        for face in faces:
 
-            face_img_raw = img_initial[face[1]:face[1] + face[2], face[0]:face[0] + face[2]]
+    for face in faces:
 
-            face_img = cv2.cvtColor(face_img_raw, cv2.COLOR_BGR2BGRA)
+        face_img_raw = img_initial[face[1]:face[1] + face[2], face[0]:face[0] + face[2]]
 
-            radius = int(face[2] / 2)
+        face_img = cv2.cvtColor(face_img_raw, cv2.COLOR_BGR2BGRA)
 
-            for rows in range(face_img.shape[0]):
-                for cols in range(face_img.shape[1]):
-                    if not incircle([rows, cols], radius,makeCircle):
-                        face_img[rows][cols][3] = 0
+        radius = int(face[2] / 2)
 
-            face_img_final = cv2.resize(face_img, (size, size))
+        for rows in range(face_img.shape[0]):
+            for cols in range(face_img.shape[1]):
+                if not incircle([rows, cols], radius,makeCircle):
+                    face_img[rows][cols][3] = 0
 
-            final_img.append(face_img_final)
-    else:
-        blankimg = np.zeros((size, size), dtype=np.uint8)
-        final_img.append(cv2.cvtColor(blankimg, cv2.COLOR_GRAY2BGR))
+        face_img_final = cv2.resize(face_img, (size, size))
+
+        final_img.append(face_img_final)
+    # else:
+    #     blankimg = np.zeros((size, size), dtype=np.uint8)
+    #     final_img.append(cv2.cvtColor(blankimg, cv2.COLOR_GRAY2BGR))
 
     if output_path == None:
         return final_img
     else:
-        file = re.split(' \\ |/|.', img_file_src)[-2:-1]
+        file = re.split(r"[./\\]", img_file_src)[-2:-1]
+
         i = 0
         for img in final_img:
-            if not cv2.imwrite(output_path + "\\" + file[0] + i + "." + file[1], img):
-                cv2.imwrite(output_path + "\\" + file[0] + i + ".png", img)
+            try:
+                cv2.imwrite(output_path + "\\" + file[0] + str(i)+ "." + file[1], img)
+            except:
+                cv2.imwrite(output_path + "\\" + file[0] + str(i) + ".png", img)
             i+=1
 
 
-def CropBody(img_file_src, size, output_path=None, makeCircle = True):
+def CropBody(img_file_src, size, output_path=None ,makeCircle = True,removeBackground = True):
     """
 
         :param img_file_src: image file
         :param size: diameter of final image
         :param output_path: output folder location(if nothing specified, return image as array)
         :param makeCircle: Crop as circle or square, By default True
+        :param removeBackground: Removing the background via mediapipe, By default True
 
 
         """
@@ -86,59 +98,87 @@ def CropBody(img_file_src, size, output_path=None, makeCircle = True):
 
         results = pose.process(image)
         image.flags.writeable = True
+        # print(results.pose_landmarks)
 
-        landmarks = results.pose_landmarks.landmark
+        if results.pose_landmarks:
+            landmarks = results.pose_landmarks.landmark
 
-        # Find location of nose, to center circle around it
-        Nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
-        if Nose:
-            RowCenter = int(Nose.y * rows)
-            ColCenter = int(Nose.x * cols)
-        else:
-            RowCenter = int(rows / 2)
-            ColCenter = int(cols / 2)
+            # Find location of nose, to center circle around it
+            Nose = landmarks[mp_pose.PoseLandmark.NOSE.value]
+            if Nose:
+                RowCenter = int(Nose.y * rows)
+                ColCenter = int(Nose.x * cols)
+            else:
+                RowCenter = int(rows / 2)
+                ColCenter = int(cols / 2)
 
-        # Calculates maximum possible radius size
-        if cols < rows:
-            radius = int(cols / 2)
-            ColCenter = radius
-            if RowCenter < radius:
-                RowCenter = radius
-            elif rows - RowCenter < radius:
-                RowCenter = rows - radius
-        else:
-            radius = int(rows / 2)
-            RowCenter = radius
-            if ColCenter < radius:
+            # Calculates maximum possible radius size
+            if cols < rows:
+                radius = int(cols / 2)
                 ColCenter = radius
-            elif cols - ColCenter < radius:
-                ColCenter = cols - radius
+                if RowCenter < radius:
+                    RowCenter = radius
+                elif rows - RowCenter < radius:
+                    RowCenter = rows - radius
+            else:
+                radius = int(rows / 2)
+                RowCenter = radius
+                if ColCenter < radius:
+                    ColCenter = radius
+                elif cols - ColCenter < radius:
+                    ColCenter = cols - radius
 
-        segment = SelfiSegmentation(0)
-        ImageOut = segment.removeBG(img, (255, 255, 255))
+            segment = SelfiSegmentation(0)
+            if removeBackground:
+                ImageOut = segment.removeBG(img, (255, 255, 255))
+            else:
+                ImageOut = img
 
-        # Crops image
-        face_img_raw = ImageOut[RowCenter - radius:RowCenter + radius, ColCenter - radius:ColCenter + radius]
 
-        # Convert to include an alpha value
-        face_img = cv2.cvtColor(face_img_raw, cv2.COLOR_BGR2BGRA)
+            # Crops image
+            face_img_raw = ImageOut[RowCenter - radius:RowCenter + radius, ColCenter - radius:ColCenter + radius]
 
-        for rows in range(face_img.shape[0]):
-            for cols in range(face_img.shape[1]):
-                if not incircle([rows, cols], radius, makeCircle):
-                    face_img[rows][cols][3] = 0
+            # Convert to include an alpha value
+            face_img = cv2.cvtColor(face_img_raw, cv2.COLOR_BGR2BGRA)
 
-        face_img_final = cv2.resize(face_img, (size, size))
+            for rows in range(face_img.shape[0]):
+                for cols in range(face_img.shape[1]):
+                    if not incircle([rows, cols], radius, makeCircle):
+                        face_img[rows][cols][3] = 0
+
+            face_img_final = cv2.resize(face_img, (size, size))
+        else:
+
+            ColCenter = int(cols / 2)
+            RowCenter = int(rows / 2)
+            radius = min(ColCenter,RowCenter)
+            if removeBackground:
+                segment = SelfiSegmentation(0)
+                img = segment.removeBG(img, (255, 255, 255))
+
+
+            face_img_raw = img[RowCenter - radius:RowCenter + radius, ColCenter - radius:ColCenter + radius]
+
+            face_img_raw = cv2.cvtColor(face_img_raw, cv2.COLOR_BGR2BGRA)
+            for rows in range(face_img_raw.shape[0]):
+                for cols in range(face_img_raw.shape[1]):
+                    if not incircle([rows, cols], radius, makeCircle):
+                        face_img_raw[rows][cols][3] = 0
+
+            face_img_final = cv2.resize(face_img_raw, (size, size))
         if output_path == None:
             return face_img_final
         else:
-            file = re.split(' \\ |/|.', img_file_src)[-2:-1]
+            file = re.split(r"[./\\]", img_file_src)[-2:-1]
 
-            if not cv2.imwrite(output_path + "\\" + file[0] + "." + file[1], face_img_final):
+
+            try:
+                cv2.imwrite(output_path + "\\" + file[0] + "." + file[1], face_img_final)
+            except:
                 cv2.imwrite(output_path + "\\" + file[0] + ".png", face_img_final)
 
 
-def CropAll(inputPath, outputPath, type=0, makeCircle = True):
+def CropAll(inputPath, outputPath, type=0, makeCircle = True,removeBackground = True):
     """
 
         :param inputPath: image folder path
@@ -153,8 +193,9 @@ def CropAll(inputPath, outputPath, type=0, makeCircle = True):
         img_initial = cv2.imread(inputPath + "\\" + file)
         rows, cols, c = img_initial.shape
         size = int(min(rows, cols))
+
         if type == 0:
-            CropBody(inputPath + "\\" + file, size, outputPath,makeCircle)
+            CropBody(inputPath + "\\" + file, size, outputPath,makeCircle,removeBackground)
         else:
             CropFace(inputPath + "\\" + file, size, outputPath,makeCircle)
 
@@ -166,11 +207,14 @@ if __name__ == "__main__":
     inputPath = os.path.join(BASE_DIR + "\\Input")
     outputPath = os.path.join(BASE_DIR + "\\Output")
 
+    CropAll(inputPath,outputPath,1,True,False)
+
+
     # for file in os.listdir(inputPath):
-    file = os.listdir(inputPath)[0]
-    print(file)
-    # img_initial = cv2.imread(inputPath + "\\" + file)
-    outImg = CropBody(inputPath + "\\" + file, 300)
-    # outImg = outImg[0]
-    if not cv2.imwrite(os.path.join(outputPath + "\\" + file), outImg):
-        raise Exception("Could not write image")
+    # file = os.listdir(inputPath)[0]
+    # print(file)
+    # # img_initial = cv2.imread(inputPath + "\\" + file)
+    # outImg = CropBody(inputPath + "\\" + file, 300)
+    # # outImg = outImg[0]
+    # if not cv2.imwrite(os.path.join(outputPath + "\\" + file), outImg):
+    #     raise Exception("Could not write image")

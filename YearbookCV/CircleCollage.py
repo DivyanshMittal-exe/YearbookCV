@@ -88,13 +88,13 @@ class Circle:
                     TotalFalse += 1
         return TotalFalse
 
-def MakeCollage(inputPath,TemplateFile,outputPath):
+def MakeCollage(inputPath,TemplateFile,outputPath,filename = "Collage.png"):
     """
 
         :param inputPath: image folder path
         :param outputPath: output folder path
         :param TemplateFile: Image file, used to make collage(Image file in black and white, white spots are places where circles will be made)
-
+        :param filename: Filename of the final collage, by default "Collage.png"
         """
     TotalFalse = 0
     CircleList = []
@@ -140,7 +140,8 @@ def MakeCollage(inputPath,TemplateFile,outputPath):
     for file in os.listdir(inputPath):
         img_initial = cv2.imread(inputPath + "\\" + file)
         img_out = CropBody(inputPath + "\\" + file, 2 * CircleList[i].r,makeCircle=True)
-        img_out = cv2.rotate(img_out, cv2.cv2.ROTATE_90_CLOCKWISE)
+        img_out = cv2.cvtColor(img_out,cv2.COLOR_BGR2BGRA)
+        img_out = cv2.rotate(img_out, cv2.cv2.ROTATE_90_COUNTERCLOCKWISE)
         for row in range(2 * CircleList[i].r):
             for col in range(2 * CircleList[i].r):
                 if img_out[col][row][3] != 0:
@@ -149,13 +150,15 @@ def MakeCollage(inputPath,TemplateFile,outputPath):
         i+=1
 
     BlankImg = cv2.rotate(BlankImg, cv2.cv2.ROTATE_90_CLOCKWISE)
-    BlankImg = cv2.rotate(BlankImg, cv2.cv2.ROTATE_90_CLOCKWISE)
-    BlankImg = cv2.rotate(BlankImg, cv2.cv2.ROTATE_90_CLOCKWISE)
+    # BlankImg = cv2.rotate(BlankImg, cv2.cv2.ROTATE_90_CLOCKWISE)
+    # BlankImg = cv2.rotate(BlankImg, cv2.cv2.ROTATE_90_CLOCKWISE)
 
     BlankImg = cv2.flip(BlankImg, 1)
 
-    if not cv2.imwrite(os.path.join(outputPath + "\\" + "Collage.png"), BlankImg):
-        raise Exception("Could not write image")
+    try:
+        cv2.imwrite(os.path.join(outputPath + "\\ " + filename), BlankImg)
+    except:
+        cv2.imwrite(os.path.join(outputPath + "\\ " + filename + ".png"), BlankImg)
 
 
 if __name__ == "__main__":
