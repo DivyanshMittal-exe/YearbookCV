@@ -3,6 +3,7 @@ import os
 import numpy as np
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
 import mediapipe as mp
+import re
 
 
 def incircle(point, radius,makeCircle):
@@ -58,9 +59,12 @@ def CropFace(img_file_src, size, output_path=None, makeCircle = True):
     if output_path == None:
         return final_img
     else:
+        file = re.split(' \\ |/|.', img_file_src)[-2:-1]
+        i = 0
         for img in final_img:
-            if not cv2.imwrite(output_path, img):
-                cv2.imwrite(output_path + ".png", face_img_final)
+            if not cv2.imwrite(output_path + "\\" + file[0] + i + "." + file[1], img):
+                cv2.imwrite(output_path + "\\" + file[0] + i + ".png", img)
+            i+=1
 
 
 def CropBody(img_file_src, size, output_path=None, makeCircle = True):
@@ -128,8 +132,10 @@ def CropBody(img_file_src, size, output_path=None, makeCircle = True):
         if output_path == None:
             return face_img_final
         else:
-            if not cv2.imwrite(output_path, face_img_final):
-                cv2.imwrite(output_path + ".png", face_img_final)
+            file = re.split(' \\ |/|.', img_file_src)[-2:-1]
+
+            if not cv2.imwrite(output_path + "\\" + file[0] + "." + file[1], face_img_final):
+                cv2.imwrite(output_path + "\\" + file[0] + ".png", face_img_final)
 
 
 def CropAll(inputPath, outputPath, type=0, makeCircle = True):

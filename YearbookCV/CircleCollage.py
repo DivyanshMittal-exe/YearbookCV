@@ -154,7 +154,7 @@ def MakeCollage(inputPath,TemplateFile,outputPath):
 
     BlankImg = cv2.flip(BlankImg, 1)
 
-    if not cv2.imwrite(os.path.join(outputPath + "\\" + file), BlankImg):
+    if not cv2.imwrite(os.path.join(outputPath + "\\" + "Collage.png"), BlankImg):
         raise Exception("Could not write image")
 
 
