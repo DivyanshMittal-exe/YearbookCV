@@ -88,7 +88,7 @@ class Circle:
                     TotalFalse += 1
         return TotalFalse
 
-def MakeCollage(inputPath,TemplateFile,outputPath,filename = "Collage.png"):
+def MakeCircleCollage(inputPath,TemplateFile,outputPath,filename = "Collage.png"):
     """
 
         :param inputPath: image folder path

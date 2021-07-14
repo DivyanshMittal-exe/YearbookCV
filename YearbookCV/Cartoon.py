@@ -28,7 +28,7 @@ def ColourQuantization(image, K=9):
     res2 = res.reshape((image.shape))
     return res2
 
-def BlurredCartoon(inputPath, outputPath):
+def BlurredCartoonFilter(inputPath, outputPath):
     """
 
         :param inputPath: image folder path
