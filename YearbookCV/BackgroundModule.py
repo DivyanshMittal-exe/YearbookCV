@@ -4,6 +4,7 @@ import mediapipe as mp
 import numpy as np
 from YearbookCV.utils import makeFolder, collect_image_files
 
+
 class SelfiSegmentation():
 
     def __init__(self, model=1):
@@ -17,7 +18,6 @@ class SelfiSegmentation():
 
     def removeBG(self, img, imgBg=(255, 255, 255), threshold=0.1):
         """
-
         :param img: image to remove background from
         :param imgBg: BackGround Image
         :param threshold: higher = more cut, lower = less cut
@@ -35,30 +35,28 @@ class SelfiSegmentation():
             imgOut = np.where(condition, img, imgBg)
         return imgOut
 
-def remove_background(input_file, output_file, background_img = (255,255,255), model=0, threshold=0.1):
-    """
 
+def remove_background(input_file, output_file, background_img=(255, 255, 255), model=0, threshold=0.1):
+    """
     :param input_file: file containing images
     :param output_file: file to store background removed images
     :param background_img: image to set for the background
     :param model: model type 0 or 1. 0 is general 1 is landscape(faster)
     :param threshold: higher = more cut, lower = less cut
     """
-    
+
     images = collect_image_files(input_file)
-    makeFolder(output_file)
+    # makeFolder(output_file)
 
     segmentor = SelfiSegmentation(model)
-    
-    cwd = os.getcwd()
-    path = cwd + "\\" + output_file
 
+    path = output_file
     for idx, file in enumerate(images):
-        
-        img = cv.imread(cwd + '/' + input_file + "/" + file)
+
+        img = cv.imread(input_file + "\\" + file)
         filename, file_ext = os.path.splitext(images[idx])
-        imgOut = segmentor.removeBG(img,background_img,threshold)
-        
+        imgOut = segmentor.removeBG(img, background_img, threshold)
+
         try:
             cv.imwrite(path + '\\' + filename + file_ext, imgOut)
         except:

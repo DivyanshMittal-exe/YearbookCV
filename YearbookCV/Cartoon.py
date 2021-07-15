@@ -86,6 +86,6 @@ if __name__ == "__main__":
 
     inputPath = os.path.join(BASE_DIR + "\\Input")
     outputPath = os.path.join(BASE_DIR + "\\Output")
-    BlurredCartoon(inputPath, outputPath)
+    BlurredCartoonFilter(inputPath, outputPath)
 
 

@@ -77,17 +77,17 @@ class CollageMaker():
         collage_image.save(filename)
         return True
 
+
 def make_collage(input_file, filename, width, init_height):
     """
-
     :param input_file: file containing images
-    :param filename: filename with extension for the output collage
+    :param filename: filename + extension for the output collage
     :param width: width
     :param init_height: height
     """
     files = [os.path.join(input_file, fn) for fn in os.listdir(input_file)]
     images = [fn for fn in files if os.path.splitext(fn)[1].lower() in ('.jpg', '.jpeg', '.png')]
-    
+
     random.shuffle(images)
 
     mclg = CollageMaker()
