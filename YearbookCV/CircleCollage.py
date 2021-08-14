@@ -169,6 +169,6 @@ if __name__ == "__main__":
     outputPath = os.path.join(BASE_DIR + "\\Output")
     TemplateFile = os.path.join(BASE_DIR + "\\Bitmap.png")
 
-    MakeCollage(inputPath,TemplateFile,outputPath)
+    MakeCircleCollage(inputPath,TemplateFile,outputPath)
 
 
